@@ -1,2 +1,2 @@
 # spring2026
-rust progrmming
+rust programming
