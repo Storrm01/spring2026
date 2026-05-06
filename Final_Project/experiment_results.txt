@@ -1,0 +1,48 @@
+
+==============================
+Experiment: Balanced workload
+==============================
+
+Summary Metrics
+Total tasks completed: 500
+Makespan: 3269 ms
+Average wait time: 873.39 ms
+Average turnaround time: 912.07 ms
+CPU tasks completed: 243
+IO tasks completed: 257
+Max wait time: 1629 ms
+Max queue length: 1
+Average queue length: 0.97
+Worker utilization: 98.23%
+
+Worker Task Summary
+Worker 0 completed 80 tasks
+Worker 1 completed 82 tasks
+Worker 2 completed 76 tasks
+Worker 3 completed 84 tasks
+Worker 4 completed 89 tasks
+Worker 5 completed 89 tasks
+
+==============================
+Experiment: Stressed CPU-heavy burst workload
+==============================
+
+Summary Metrics
+Total tasks completed: 500
+Makespan: 4334 ms
+Average wait time: 1596.21 ms
+Average turnaround time: 1646.79 ms
+CPU tasks completed: 430
+IO tasks completed: 70
+Max wait time: 3274 ms
+Max queue length: 1
+Average queue length: 0.72
+Worker utilization: 97.05%
+
+Worker Task Summary
+Worker 0 completed 88 tasks
+Worker 1 completed 84 tasks
+Worker 2 completed 78 tasks
+Worker 3 completed 85 tasks
+Worker 4 completed 86 tasks
+Worker 5 completed 79 tasks
