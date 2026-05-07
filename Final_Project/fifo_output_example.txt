@@ -1,0 +1,14 @@
+== FIFO simulation ==
+1000 tasks, 70% IO / 30% CPU, 8 workers, cap 100%
+
+— results —
+total runtime           : 4324 ms
+makespan                : 4324 ms
+tasks completed         : 1000 (IO=708, CPU=292)
+avg wait time           : 583.00 ms
+avg turnaround time     : 617.30 ms
+max wait time           : 1167 ms
+avg CPU usage           : 98.86 %
+avg workers active      : 8.00 / 8
+monitor samples         : 1025
+monitor csv             : monitor_log.csv

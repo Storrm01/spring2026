@@ -2,10 +2,9 @@
 
 ## Project Overview
 
-Final_Project is a concurrent task dispatcher simulation written in Rust.
-The program simulates how an operating system or service scheduler handles incoming CPU-bound and IO-bound tasks using a bounded worker pool, queue-based scheduling, and concurrent execution.
+Final_Project is a concurrent task dispatcher simulation written in Rust. The program simulates how an operating system or service scheduler handles incoming CPU-bound and IO-bound tasks using a bounded worker pool, queue-based scheduling, and concurrent execution.
 
-The system generates tasks over time, places them into queues, dispatches them using a weighted round-robin scheduling policy, processes them concurrently using worker threads, records performance statistics, and shuts down cleanly after all work is completed.
+The system generates tasks over time, places them into queues, dispatches them using scheduling policies, processes them concurrently using worker threads, records performance statistics, and shuts down cleanly after all work is completed.
 
 ---
 
@@ -15,11 +14,11 @@ The system generates tasks over time, places them into queues, dispatches them u
 - CPU and IO task simulation
 - Queue-based scheduling system
 - Bounded worker pool
-- Weighted round-robin dispatch policy
+- FIFO and weighted round-robin dispatch policies
 - Automatic workload generation
 - Performance metrics collection
 - Clean thread shutdown
-- Experiment result logging to a text file
+- Experiment result logging to text files
 
 ---
 
@@ -28,16 +27,19 @@ The system generates tasks over time, places them into queues, dispatches them u
 - Rust
 - Cargo
 - Standard library concurrency primitives:
-  - `thread` 
-    - for task generator, dispatcher and workers
+  - `thread`
+    - Used for task generator, dispatcher, and worker threads to allow concurrent execution.
   - `mpsc`
-    - for one side to send a task, while the other receives it (used for generator -> dispatcher, dispatcher -> workers, workers -> metrics collector) to safely send a task to another thread
+    - Used for communication between threads. One side sends tasks while the other receives them. Channels are used between:
+      - generator → dispatcher
+      - dispatcher → workers
+      - workers → metrics collector
   - `Arc`
-    - for when multiple worker threads need access to the same receiver, if 'Arc' isnt here, only one thread could own the receiver
+    - Allows multiple worker threads to safely share ownership of the same receiver.
   - `Mutex`
-    - Only one worker thread can access the receiver at once, preventing race conditions
+    - Ensures that only one worker thread accesses shared data at a time, preventing race conditions and unsafe concurrent access.
 - `rand` crate
-    - to create random task durations, using 
+  - Used to generate random task types, durations, and arrival timing for workload simulation.
 
 ---
 
@@ -48,7 +50,9 @@ Final_Project/
 ├── Cargo.toml
 ├── src/
 │   └── main.rs
-└── experiment_results.txt
+├── experiment_results.txt
+├── fifo_output_example.txt
+└── optimized_output_example.txt
 ```
 
 ---
@@ -93,13 +97,17 @@ cargo run --release
 
 # Output
 
-The program writes experiment results to:
+The program generates three output files:
 
 ```text
 experiment_results.txt
+fifo_output_example.txt
+optimized_output_example.txt
 ```
 
-The file includes:
+## experiment_results.txt
+
+Contains the primary experiment results for the project workloads, including:
 - makespan
 - average wait time
 - average turnaround time
@@ -107,6 +115,14 @@ The file includes:
 - queue statistics
 - CPU vs IO completion counts
 - worker task summaries
+
+## fifo_output_example.txt
+
+Contains formatted example output for the FIFO scheduling policy.
+
+## optimized_output_example.txt
+
+Contains formatted example output for the optimized weighted round-robin scheduling policy.
 
 ---
 
@@ -122,13 +138,15 @@ The generator thread automatically creates tasks using a fixed random seed for r
 
 ### Dispatcher Thread
 
-The dispatcher receives tasks and places them into separate CPU and IO queues using `VecDeque`.
+The dispatcher receives tasks and places them into queues using `VecDeque`.
 
-The dispatcher uses a weighted round-robin scheduling policy:
-- two CPU tasks are preferred
-- then one IO task is selected
+Two scheduling policies were implemented:
+- FIFO scheduling
+- Weighted round-robin scheduling
 
-This policy allows CPU-heavy workloads to receive more processing time while still preventing IO starvation.
+The weighted round-robin scheduler gives preference to CPU tasks by dispatching two CPU tasks before one IO task.
+
+This policy allows CPU-heavy workloads to receive more processing time while still ensuring IO tasks continue to make progress.
 
 ### Worker Pool
 
@@ -157,20 +175,28 @@ After all tasks are dispatched:
 
 ---
 
-# Scheduling Policy
+# Scheduling Policies
 
-The scheduling policy used is a weighted round-robin dispatcher.
+## FIFO Scheduling
+
+FIFO (First In First Out) scheduling dispatches tasks in the order they arrive. Tasks are processed sequentially from the front of the queue without prioritizing task type.
+
+## Weighted Round-Robin Scheduling
+
+The weighted round-robin scheduler prioritizes CPU tasks by dispatching two CPU tasks before one IO task.
 
 Behavior:
 - CPU queue receives priority
 - two CPU tasks are dispatched before one IO task
 - if one queue becomes empty, the dispatcher uses the remaining queue
 
-This improves throughput for CPU-heavy workloads while still allowing IO tasks to progress.
+The primary optimization goal is reducing total runtime (makespan).
 
 ---
 
 # Summary of Experiments
+
+Additional formatted FIFO and optimized scheduler example outputs were also generated for comparison purposes.
 
 ## Experiment A — Balanced Workload
 
@@ -182,11 +208,9 @@ Configuration:
 - normal arrival timing
 
 Results:
-- lower average wait times
-- balanced worker utilization
-- fair distribution between CPU and IO tasks
-
-This workload demonstrated stable scheduling performance and efficient concurrency.
+- balanced task distribution
+- stable worker utilization
+- predictable queue behavior
 
 ---
 
@@ -199,11 +223,15 @@ Configuration:
 - 6 workers
 
 Results:
-- higher average wait times
-- increased turnaround times
-- heavier CPU queue pressure
+- increased queue pressure
+- higher wait times
+- longer overall runtime
 
-This workload stressed the dispatcher and demonstrated how CPU-heavy workloads increase contention and waiting time.
+---
+
+# Runtime Priority
+
+The primary performance metric for this project is total runtime (makespan), as specified in the project amendments. Other collected metrics such as wait time, queue statistics, worker utilization, and task distribution are supplementary and are used only to help explain runtime behavior. If a scheduling policy improves secondary metrics at the cost of increasing total runtime, it is not considered a successful optimization for this project.
 
 ---
 
@@ -225,19 +253,24 @@ The project records:
 
 # Tool Use Disclosure
 
-Tools used:
+## Tools Used
+
 - ChatGPT
 - Rust documentation
 
-Help provided:
+## Help Provided
+
 - debugging concurrency logic
 - improving scheduling structure
 - refining metrics collection
 - improving shutdown handling
-- issues with warnings and what to do to fix them
+- resolving compiler warnings
+- improving experiment output formatting
 
-Example of accepted advice:
+## Example of Accepted Advice
+
 - implementing weighted round-robin scheduling
 
-Example of modified/fixed advice:
+## Example of Modified/Fixed Advice
+
 - replacing large per-task logging with summary-based reporting for cleaner experiment output
